@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 //ligação com o editor.h
-#include "EDITOR.h"
+#include "editor.h"
 
 #define MAX_FILMES 100
 
@@ -74,7 +74,7 @@ void salvarArquivoBinario(const FilmeInfo *filmeInfo, int num_filme) {
     }
 }
 
-int editor() {
+int main() {
     FilmeInfo *filmeInfo = malloc(MAX_FILMES * sizeof(FilmeInfo)); // ALOCAÇÃO DA MEMORIA
     int num_filme = 0;
 
