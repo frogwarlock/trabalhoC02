@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 //ligação com o editor.h
-#include "EDITOR.h"
+#include "editor.h" 
 
 #define MAX_FILMES 100
 
@@ -52,33 +52,33 @@ void removerFilme(FilmeInfo *lista, int *tamanho, int chave) {
     }
 }
 
-void carregarArquivoBinario(FilmeInfo *filmeInfo, int *num_filme) {
-    FILE *arquivo_binario = fopen("filmes.bin", "rb");
-    if (arquivo_binario != NULL) {
-        fread(filmeInfo, sizeof(FilmeInfo), MAX_FILMES, arquivo_binario);
-        fclose(arquivo_binario);
+void carregarArquivoBinario(FilmeInfo *filmeInfo, int *num_filme, char *argv[]) {
+    FILE *arquivo = fopen(argv[1], "rb");
+    if (arquivo != NULL) {
+        fread(filmeInfo, sizeof(FilmeInfo), MAX_FILMES, arquivo);
+        fclose(arquivo);
         *num_filme = MAX_FILMES; // Atualiza o número de filmes com base na leitura
     } else {
-        printf("Um erro ocorreu ao abrir o arquivo filmes.bin para leitura. Certifique-se de executar o gerador.c primeiro.\n");
+        printf("Um erro ocorreu ao abrir o arquivo %s para leitura. Certifique-se de executar o gerador.c primeiro.\n", argv[1]);
         exit(1);
     }
 }
 
-void salvarArquivoBinario(const FilmeInfo *filmeInfo, int num_filme) {
-    FILE *arquivo_binario = fopen("filmes.bin", "wb");
-    if (arquivo_binario == NULL) {
-        printf("Um erro ocorreu ao abrir o arquivo filmes.bin para escrita\n");
+void salvarArquivoBinario(const FilmeInfo *filmeInfo, int num_filme, char *argv[]) {
+    FILE *arquivo = fopen(argv[1], "wb");
+    if (arquivo != NULL) {
+        fwrite(filmeInfo, sizeof(FilmeInfo), num_filme, arquivo);
+        fclose(arquivo);
     } else {
-        fwrite(filmeInfo, sizeof(FilmeInfo), num_filme, arquivo_binario);
-        fclose(arquivo_binario);
+        printf("Um erro ocorreu ao abrir o arquivo %s para escrita\n", argv[1]);
     }
 }
 
-int editor() {
+int editor(int argc, char *argv[]) {
     FilmeInfo *filmeInfo = malloc(MAX_FILMES * sizeof(FilmeInfo)); // ALOCAÇÃO DA MEMORIA
     int num_filme = 0;
 
-    carregarArquivoBinario(filmeInfo, &num_filme);
+    carregarArquivoBinario(filmeInfo, &num_filme, argv);
 
     int opcao;
     do {
@@ -138,10 +138,9 @@ int editor() {
 
     } while (opcao != 0);
 
-    salvarArquivoBinario(filmeInfo, num_filme);
+    salvarArquivoBinario(filmeInfo, num_filme, argv);
 
     free(filmeInfo);
 
     return 0;
 }
-

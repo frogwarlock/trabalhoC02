@@ -6,12 +6,12 @@
 // Inclua o código fonte do gerador
 #include "gerador.h"
 
+//Inclui o código do editor
+#include "editor.h"
+
 int main(int argc, char *argv[]) {
-    // Chame a função gerador com os parâmetros apropriados
-    int resultado = gerador(argc, argv), editor();
+    gerador(argc, argv);
+    editor(argc, argv);
+    printf("Terminei o editor!");
 
-
-    // Restante do código aqui
-
-    return resultado;
 }
