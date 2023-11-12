@@ -1,13 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_FILMES 100
+//ligação com o editor.h
+#include "EDITOR.h"
 
-typedef struct {
-    int codigo;
-    int ano;
-    char nome_filme[50];
-} FilmeInfo;
+#define MAX_FILMES 100
 
 int comparaFilmesPorCodigo(const void *a, const void *b) {
     return ((FilmeInfo *)a)->codigo - ((FilmeInfo *)b)->codigo;
@@ -77,7 +74,7 @@ void salvarArquivoBinario(const FilmeInfo *filmeInfo, int num_filme) {
     }
 }
 
-int main() {
+int editor() {
     FilmeInfo *filmeInfo = malloc(MAX_FILMES * sizeof(FilmeInfo)); // ALOCAÇÃO DA MEMORIA
     int num_filme = 0;
 

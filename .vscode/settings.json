@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "gerador.h": "c",
+        "editor.h": "c",
+        "*.o": "c"
+    }
+}

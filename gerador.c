@@ -1,16 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct FilmeNo {
-    int codigo;
-    int ano;
-    char nome_filme[50];
-    struct FilmeNo* next;
-} FilmeNo;
-
-typedef struct {
-    FilmeNo* head;
-} FilmeList;
+//Incluir o HEADER FILE como gerador.h
+#include "GERADOR.h"
 
 void insereFilme(FilmeList* lista, int codigo, int ano, const char* nome_filme) {
     FilmeNo* novoFilme = malloc(sizeof(FilmeNo));
