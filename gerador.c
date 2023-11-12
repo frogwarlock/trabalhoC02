@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 //Incluir o HEADER FILE como gerador.h
-#include "GERADOR.h"
+#include "gerador.h"
 
 void insereFilme(FilmeList* lista, int codigo, int ano, const char* nome_filme) {
     FilmeNo* novoFilme = malloc(sizeof(FilmeNo));
