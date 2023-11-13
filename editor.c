@@ -1,84 +1,151 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-//ligação com o editor.h
-#include "editor.h" 
+typedef struct FilmeNo {
+    int codigo;
+    int ano;
+    char nome_filme[50];
+    struct FilmeNo* next;
+} FilmeNo;
 
-#define MAX_FILMES 100
+typedef struct {
+    FilmeNo* head;
+} FilmeList;
 
-int comparaFilmesPorCodigo(const void *a, const void *b) {
-    return ((FilmeInfo *)a)->codigo - ((FilmeInfo *)b)->codigo;
-}
-
-void exibirFilme(const FilmeInfo *filme) {
+void exibirFilme(const FilmeNo* filme) {
     printf("%d - %d - %s\n", filme->codigo, filme->ano, filme->nome_filme);
 }
 
-void exibirLista(const FilmeInfo *lista, int tamanho) {
-    printf("Lista de Filmes:\n");
-    for (int i = 0; i < tamanho; i++) {
-        exibirFilme(&lista[i]);
+void exibirLista(const FilmeList* lista) {
+    printf("Filmes ordenados por código:\n");
+    FilmeNo* atual = lista->head;
+    while (atual != NULL) {
+        exibirFilme(atual);
+        atual = atual->next;
     }
     printf("\n");
 }
 
-int buscarFilme(const FilmeInfo *lista, int tamanho, int chave) {
-    for (int i = 0; i < tamanho; i++) {
-        if (lista[i].codigo == chave) {
-            return i; // Retorna o índice do filme encontrado
+FilmeNo* buscarFilme(const FilmeList* lista, int chave) {
+    FilmeNo* atual = lista->head;
+    while (atual != NULL) {
+        if (atual->codigo == chave) {
+            return atual; // Retorna o nó do filme encontrado
         }
+        atual = atual->next;
     }
-    return -1; // Retorna -1 se o filme não for encontrado
+    return NULL; // Retorna NULL se o filme não for encontrado
 }
 
-void inserirFilme(FilmeInfo *lista, int *tamanho, FilmeInfo novoFilme) {
-    // Adiciona o novo filme no final da lista
-    lista[*tamanho] = novoFilme;
-    (*tamanho)++;
-    // Reordena a lista com base no código após a inserção
-    qsort(lista, *tamanho, sizeof(FilmeInfo), comparaFilmesPorCodigo);
-}
 
-void removerFilme(FilmeInfo *lista, int *tamanho, int chave) {
-    int indice = buscarFilme(lista, *tamanho, chave);
-    if (indice != -1) {
-        // Move os filmes após o filme removido para ocupar o espaço
-        for (int i = indice; i < *tamanho - 1; i++) {
-            lista[i] = lista[i + 1];
-        }
-        (*tamanho)--;
-    } else {
-        printf("Filme com código %d não encontrado.\n", chave);
-    }
-}
-
-void carregarArquivoBinario(FilmeInfo *filmeInfo, int *num_filme, char *argv[]) {
-    FILE *arquivo = fopen(argv[1], "rb");
-    if (arquivo != NULL) {
-        fread(filmeInfo, sizeof(FilmeInfo), MAX_FILMES, arquivo);
-        fclose(arquivo);
-        *num_filme = MAX_FILMES; // Atualiza o número de filmes com base na leitura
-    } else {
-        printf("Um erro ocorreu ao abrir o arquivo %s para leitura. Certifique-se de executar o gerador.c primeiro.\n", argv[1]);
+void inserirFilme(FilmeList* lista, int codigo, int ano, const char* nome_filme) {
+    FilmeNo* novoFilme = malloc(sizeof(FilmeNo));
+    if (novoFilme == NULL) {
+        printf("Erro ao alocar memória para novo filme.\n");
         exit(1);
     }
-}
+    novoFilme->codigo = codigo;
+    novoFilme->ano = ano;
+    snprintf(novoFilme->nome_filme, sizeof(novoFilme->nome_filme), "%s", nome_filme);
+    novoFilme->next = NULL;
 
-void salvarArquivoBinario(const FilmeInfo *filmeInfo, int num_filme, char *argv[]) {
-    FILE *arquivo = fopen(argv[1], "wb");
-    if (arquivo != NULL) {
-        fwrite(filmeInfo, sizeof(FilmeInfo), num_filme, arquivo);
-        fclose(arquivo);
+    if (lista->head == NULL || codigo < lista->head->codigo) {
+        novoFilme->next = lista->head;
+        lista->head = novoFilme;
     } else {
-        printf("Um erro ocorreu ao abrir o arquivo %s para escrita\n", argv[1]);
+        FilmeNo* atual = lista->head;
+        while (atual->next != NULL && codigo > atual->next->codigo) {
+            atual = atual->next;
+        }
+        novoFilme->next = atual->next;
+        atual->next = novoFilme;
     }
 }
 
-int editor(int argc, char *argv[]) {
-    FilmeInfo *filmeInfo = malloc(MAX_FILMES * sizeof(FilmeInfo)); // ALOCAÇÃO DA MEMORIA
-    int num_filme = 0;
+void removerFilme(FilmeList* lista, int chave) {
+    FilmeNo* atual = lista->head;
+    if (atual == NULL) {
+        printf("Lista vazia. Nenhum filme removido.\n");
+        return;
+    }
 
-    carregarArquivoBinario(filmeInfo, &num_filme, argv);
+    // Caso especial: o nó a ser removido é o primeiro
+    if (atual->codigo == chave) {
+        lista->head = atual->next;
+        free(atual);
+        printf("Filme removido com sucesso.\n");
+        return;
+    }
+
+    // Busca o nó a ser removido
+    while (atual->next != NULL && atual->next->codigo != chave) {
+        atual = atual->next;
+    }
+
+    if (atual->next == NULL) {
+        printf("Filme com código %d não encontrado.\n", chave);
+        return;
+    }
+
+    // Remove o nó
+    FilmeNo* temp = atual->next;
+    atual->next = temp->next;
+    free(temp);
+    printf("Filme removido com sucesso.\n");
+}
+
+void carregarArquivoBinario(FilmeList* lista, char* nome_arquivo) {
+    FILE* arquivo_binario = fopen(nome_arquivo, "rb");
+    if (arquivo_binario == NULL) {
+        printf("Um erro ocorreu ao abrir o arquivo %s para leitura\n", nome_arquivo);
+        exit(1);
+    }
+
+    FilmeNo temp;
+    while (fread(&temp, sizeof(FilmeNo), 1, arquivo_binario) == 1) {
+        inserirFilme(lista, temp.codigo, temp.ano, temp.nome_filme);
+    }
+
+    fclose(arquivo_binario);
+}
+
+void salvarArquivoBinario(const FilmeList* lista, char* nome_arquivo) {
+    FILE* arquivo_binario = fopen(nome_arquivo, "wb");
+    if (arquivo_binario == NULL) {
+        printf("Um erro ocorreu ao abrir o arquivo %s para escrita\n", nome_arquivo);
+        exit(1);
+    }
+
+    FilmeNo* atual = lista->head;
+    while (atual != NULL) {
+        fwrite(atual, sizeof(FilmeNo), 1, arquivo_binario);
+        atual = atual->next;
+    }
+
+    fclose(arquivo_binario);
+}
+
+void liberarLista(FilmeList* lista) {
+    FilmeNo* atual = lista->head;
+    while (atual != NULL) {
+        FilmeNo* proximo = atual->next;
+        free(atual);
+        atual = proximo;
+    }
+    lista->head = NULL; // Garante que a lista está vazia após liberar os nós
+}
+
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        printf("Uso: %s <arquivo_binario>\n", argv[0]);
+        return 1;
+    }
+
+    FilmeList lista;
+    lista.head = NULL;
+
+    // Carregar filmes do arquivo binário
+    carregarArquivoBinario(&lista, argv[1]);
 
     int opcao;
     do {
@@ -87,21 +154,25 @@ int editor(int argc, char *argv[]) {
         printf("2. Remover Filme\n");
         printf("3. Exibir Lista de Filmes\n");
         printf("4. Buscar Filme por Codigo\n");
+        printf("5. Salvar Arquivo Antes\n");
         printf("0. Encerrar Programa\n");
         printf("Escolha uma opcao: ");
         scanf("%d", &opcao);
 
         switch (opcao) {
             case 1: {
-                FilmeInfo novoFilme;
+                int codigo, ano;
+                char nome_filme[50];
                 printf("Digite o codigo do novo filme: ");
-                scanf("%d", &novoFilme.codigo);
+                scanf("%d", &codigo);
                 printf("Digite o ano do novo filme: ");
-                scanf("%d", &novoFilme.ano);
+                scanf("%d", &ano);
                 printf("Digite o nome do novo filme: ");
-                scanf(" %[^\n]", novoFilme.nome_filme);
+                scanf(" %[^\n]", nome_filme);
 
-                inserirFilme(filmeInfo, &num_filme, novoFilme);
+                inserirFilme(&lista, codigo, ano, nome_filme);
+                salvarArquivoBinario(&lista, argv[1]);
+
                 break;
             }
             case 2: {
@@ -109,27 +180,42 @@ int editor(int argc, char *argv[]) {
                 printf("Digite o codigo do filme a ser removido: ");
                 scanf("%d", &codigoRemover);
 
-                removerFilme(filmeInfo, &num_filme, codigoRemover);
+                removerFilme(&lista, codigoRemover);
+                salvarArquivoBinario(&lista, argv[1]);
+
                 break;
             }
             case 3:
-                exibirLista(filmeInfo, num_filme);
+                exibirLista(&lista);
                 break;
             case 4: {
                 int codigoBuscar;
                 printf("Digite o codigo do filme a ser buscado: ");
                 scanf("%d", &codigoBuscar);
 
-                int indice = buscarFilme(filmeInfo, num_filme, codigoBuscar);
-                if (indice != -1) {
+                FilmeNo* filmeEncontrado = buscarFilme(&lista, codigoBuscar);
+                if (filmeEncontrado != NULL) {
                     printf("Filme encontrado:\n");
-                    exibirFilme(&filmeInfo[indice]);
+                    printf("Codigo: %d\n", filmeEncontrado->codigo);
+                    printf("Ano: %d\n", filmeEncontrado->ano);
+                    printf("Nome: %s\n", filmeEncontrado->nome_filme);
                 } else {
                     printf("Filme com codigo %d nao encontrado.\n", codigoBuscar);
                 }
+
+                break;
+            }
+            case 5:{
+                char nomeBinario[50];
+                printf("Digite o nome do arquivo (coloque .bin no fim): \n");
+
+                scanf("%s", nomeBinario);
+
+                salvarArquivoBinario(&lista, nomeBinario);
                 break;
             }
             case 0:
+                printf("Encerrando o programa...\n");
                 break;
             default:
                 printf("Opcao invalida. Tente novamente.\n");
@@ -138,9 +224,7 @@ int editor(int argc, char *argv[]) {
 
     } while (opcao != 0);
 
-    salvarArquivoBinario(filmeInfo, num_filme, argv);
-
-    free(filmeInfo);
+    liberarLista(&lista);
 
     return 0;
 }
