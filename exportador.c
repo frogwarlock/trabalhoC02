@@ -1,16 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct FilmeNo {
-    int codigo;
-    int ano;
-    char nome_filme[50];
-    struct FilmeNo* next;
-} FilmeNo;
-
-typedef struct {
-    FilmeNo* head;
-} FilmeList;
+#include "exportador.h"
 
 void inverterLista(FilmeList* lista_filmes) {
     FilmeNo *anterior = NULL, *atual = lista_filmes->head, *proximo;

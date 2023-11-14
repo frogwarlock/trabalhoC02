@@ -1,8 +1,7 @@
-#ifndef EDITOR_H
-#define EDITOR_H
+#ifndef EXPORTADOR_H
+#define EXPORTADOR_H
 
-
-//estrutura de FilmeInfo
+// Estrutura usada no exportador 
 typedef struct FilmeNo {
     int codigo;
     int ano;
@@ -13,7 +12,5 @@ typedef struct FilmeNo {
 typedef struct {
     FilmeNo* head;
 } FilmeList;
-
-
 
 #endif

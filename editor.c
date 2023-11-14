@@ -1,21 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct FilmeNo {
-    int codigo;
-    int ano;
-    char nome_filme[50];
-    struct FilmeNo* next;
-} FilmeNo;
+#include "editor.h"
 
-typedef struct {
-    FilmeNo* head;
-} FilmeList;
-
+// Mostra os filmes da lista filmes.txt no terminal
 void exibirFilme(const FilmeNo* filme) {
     printf("%d - %d - %s\n", filme->codigo, filme->ano, filme->nome_filme);
 }
 
+// Mostra a lista feita em memoria heap
 void exibirLista(const FilmeList* lista) {
     printf("Filmes ordenados por código:\n");
     FilmeNo* atual = lista->head;
@@ -26,18 +19,19 @@ void exibirLista(const FilmeList* lista) {
     printf("\n");
 }
 
+// Entrado o numero no terminal do filme ele busca no txt 
 FilmeNo* buscarFilme(const FilmeList* lista, int chave) {
     FilmeNo* atual = lista->head;
     while (atual != NULL) {
         if (atual->codigo == chave) {
-            return atual; // Retorna o nó do filme encontrado
+            return atual; // Retorna o no do filme encontrado
         }
         atual = atual->next;
     }
-    return NULL; // Retorna NULL se o filme não for encontrado
+    return NULL; // Retorna NULL se o filme nao for encontrado
 }
 
-
+// Entrado o codigo, ano e nome ele insere o filme na lista
 void inserirFilme(FilmeList* lista, int codigo, int ano, const char* nome_filme) {
     FilmeNo* novoFilme = malloc(sizeof(FilmeNo));
     if (novoFilme == NULL) {
@@ -62,10 +56,12 @@ void inserirFilme(FilmeList* lista, int codigo, int ano, const char* nome_filme)
     }
 }
 
+// Remove o filme da lista em heap
+
 void removerFilme(FilmeList* lista, int chave) {
     FilmeNo* atual = lista->head;
     if (atual == NULL) {
-        printf("Lista vazia. Nenhum filme removido.\n");
+        printf("Lista vazia. Nenhum filme removido.\n"); // Caso a lista esteja vazia ele nao vai remover nenhum filme
         return;
     }
 
@@ -73,7 +69,7 @@ void removerFilme(FilmeList* lista, int chave) {
     if (atual->codigo == chave) {
         lista->head = atual->next;
         free(atual);
-        printf("Filme removido com sucesso.\n");
+        printf("Filme removido com sucesso.\n"); // Caso o codigo do filme encontrado ele remove o filme
         return;
     }
 
@@ -83,7 +79,7 @@ void removerFilme(FilmeList* lista, int chave) {
     }
 
     if (atual->next == NULL) {
-        printf("Filme com código %d não encontrado.\n", chave);
+        printf("Filme com código %d não encontrado.\n", chave); // Caso o codigo do filme nao for encontrado ele retorna essa mensagaem
         return;
     }
 
@@ -94,6 +90,8 @@ void removerFilme(FilmeList* lista, int chave) {
     printf("Filme removido com sucesso.\n");
 }
 
+
+// Carrega o arquivo binario criado pelo gerador.c
 void carregarArquivoBinario(FilmeList* lista, char* nome_arquivo) {
     FILE* arquivo_binario = fopen(nome_arquivo, "rb");
     if (arquivo_binario == NULL) {
@@ -108,7 +106,7 @@ void carregarArquivoBinario(FilmeList* lista, char* nome_arquivo) {
 
     fclose(arquivo_binario);
 }
-
+// Salva o arquivo txt editado para binario
 void salvarArquivoBinario(const FilmeList* lista, char* nome_arquivo) {
     FILE* arquivo_binario = fopen(nome_arquivo, "wb");
     if (arquivo_binario == NULL) {
@@ -132,7 +130,7 @@ void liberarLista(FilmeList* lista) {
         free(atual);
         atual = proximo;
     }
-    lista->head = NULL; // Garante que a lista está vazia após liberar os nós
+    lista->head = NULL; // Garante que a lista esta vazia apos liberar os nos
 }
 
 int main(int argc, char *argv[]) {
@@ -159,7 +157,7 @@ int main(int argc, char *argv[]) {
         printf("Escolha uma opcao: ");
         scanf("%d", &opcao);
 
-        switch (opcao) {
+        switch (opcao) { // Entra na primeira opcao escolhida pelo usuario 
             case 1: {
                 int codigo, ano;
                 char nome_filme[50];
