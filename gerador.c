@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 //Incluir o HEADER FILE como gerador.h
-#include "gerador.h"
+#include "GERADOR.h"
 
 void insereFilme(FilmeList* lista, int codigo, int ano, const char* nome_filme) {
     FilmeNo* novoFilme = malloc(sizeof(FilmeNo));
@@ -84,7 +84,7 @@ void escreveBinario(FilmeList* lista, const char* nome_arquivo) {
     fclose(arquivo_binario);
 }
 
-int gerador(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     if (argc != 3) {
         printf("Uso: %s <arquivo_entrada> <arquivo_saida>\n", argv[0]);
         return 1;
@@ -178,7 +178,7 @@ int main() {
     //ordem dos filmes 
     printf("Filmes ordenados por código:\n");
     for (int i = 0; i < num_filme; i++) {
-        printf("%d - %d - %s\n", filmeInfo[i].codigo, filmeInfo[i].ano, filmeInfo[i].nome_filme);
+        printf("%d %d %s\n", filmeInfo[i].codigo, filmeInfo[i].ano, filmeInfo[i].nome_filme);
     }
 
     free(filmeInfo);
