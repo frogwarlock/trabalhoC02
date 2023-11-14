@@ -1,32 +1,69 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "exportador.h"
+// Estrutura para o nó do filme
+typedef struct FilmeNo {
+    int codigo;
+    int ano;
+    char nome_filme[50];
+    struct FilmeNo* next;
+} FilmeNo;
 
-void inverterLista(FilmeList* lista_filmes) {
-    FilmeNo *anterior = NULL, *atual = lista_filmes->head, *proximo;
+// Estrutura para a lista de filmes
+typedef struct FilmeList {
+    FilmeNo* head;
+} FilmeList;
 
-    while (atual != NULL) {
-        proximo = atual->next;
-        atual->next = anterior;
-        anterior = atual;
-        atual = proximo;
+// Função recursiva para inverter a lista
+FilmeNo* inverterRecursivo(FilmeNo* atual, FilmeNo* anterior) {
+    if (atual == NULL) {
+        return anterior;
     }
 
-    lista_filmes->head = anterior;
+    FilmeNo* proximo = atual->next;
+    atual->next = anterior;
+
+    return inverterRecursivo(proximo, atual);
 }
 
-void lerBinarioEscreverTexto(const char *arquivo_binario, const char *arquivo_texto) {
-    FILE *arquivo_bin = fopen(arquivo_binario, "rb");
-    if (arquivo_bin == NULL) {
-        printf("Erro ao abrir o arquivo binário %s para leitura\n", arquivo_binario);
-        exit(EXIT_FAILURE);
+// Função para inverter a lista usando a função recursiva
+void inverterLista(FilmeList* lista_filmes) {
+    lista_filmes->head = inverterRecursivo(lista_filmes->head, NULL);
+}
+
+// Função para exibir o filme
+void exibirFilme(const FilmeNo* filme) {
+    printf("%d - %d - %s\n", filme->codigo, filme->ano, filme->nome_filme);
+}
+
+// Função para exibir a lista de filmes
+void exibirLista(const FilmeList* lista) {
+    printf("Filmes ordenados por código:\n");
+    FilmeNo* atual = lista->head;
+    while (atual != NULL) {
+        exibirFilme(atual);
+        atual = atual->next;
+    }
+    printf("\n");
+}
+
+// Função principal do programa
+int main(int argc, char *argv[]) {
+    if (argc != 3) {
+        printf("Uso: %s <arquivo_binario> <arquivo_texto>\n", argv[0]);
+        return 1;
     }
 
     FilmeList lista_filmes;
     lista_filmes.head = NULL;
 
     // Lê os dados do arquivo binário e constrói a lista encadeada
+    FILE *arquivo_bin = fopen(argv[1], "rb");
+    if (arquivo_bin == NULL) {
+        printf("Erro ao abrir o arquivo binário %s para leitura\n", argv[1]);
+        return EXIT_FAILURE;
+    }
+
     FilmeNo *novo_filme;
     while ((novo_filme = (FilmeNo*)malloc(sizeof(FilmeNo))) != NULL &&
            fread(novo_filme, sizeof(FilmeNo), 1, arquivo_bin) == 1) {
@@ -36,14 +73,14 @@ void lerBinarioEscreverTexto(const char *arquivo_binario, const char *arquivo_te
 
     fclose(arquivo_bin);
 
-    // Inverte a lista para ter a ordem crescente
+    // Inverte a lista usando a função recursiva
     inverterLista(&lista_filmes);
 
     // Abre o arquivo de texto para escrita
-    FILE *arquivo_texto_ptr = fopen(arquivo_texto, "w");
+    FILE *arquivo_texto_ptr = fopen(argv[2], "w");
     if (arquivo_texto_ptr == NULL) {
         perror("Erro ao abrir o arquivo de texto para escrita");
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
 
     // Escreve os dados no arquivo de texto
@@ -62,16 +99,7 @@ void lerBinarioEscreverTexto(const char *arquivo_binario, const char *arquivo_te
 
     fclose(arquivo_texto_ptr);
 
-    printf("Exportacao concluida. Dados exportados para %s\n", arquivo_texto);
-}
-
-int main(int argc, char *argv[]) {
-    if (argc != 3) {
-        printf("Uso: %s <arquivo_binario> <arquivo_texto>\n", argv[0]);
-        return 1;
-    }
-
-    lerBinarioEscreverTexto(argv[1], argv[2]);
+    printf("Exportacao concluida. Dados exportados para %s\n", argv[2]);
 
     return 0;
 }
