@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     // Lê os dados do arquivo binário e constrói a lista encadeada
     FILE *arquivo_bin = fopen(argv[1], "rb");
     if (arquivo_bin == NULL) {
-        printf("Erro ao abrir o arquivo binário %s para leitura\n", argv[1]);
+        printf("Erro ao abrir o arquivo binario %s para leitura\n", argv[1]);
         return EXIT_FAILURE;
     }
 
