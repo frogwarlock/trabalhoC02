@@ -1,18 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Estrutura para o nó do filme
-typedef struct FilmeNo {
-    int codigo;
-    int ano;
-    char nome_filme[50];
-    struct FilmeNo* next;
-} FilmeNo;
-
-// Estrutura para a lista de filmes
-typedef struct FilmeList {
-    FilmeNo* head;
-} FilmeList;
+#include "exportador.h"
 
 // Função recursiva para inverter a lista
 FilmeNo* inverterRecursivo(FilmeNo* atual, FilmeNo* anterior) {
